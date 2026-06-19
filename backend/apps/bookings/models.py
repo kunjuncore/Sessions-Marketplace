@@ -24,10 +24,10 @@ class Booking(models.Model):
         max_length=10, choices=Status.choices, default=Status.PENDING
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
-        # Prevent a user from booking the same session twice
         unique_together = [["user", "session"]]
 
     def __str__(self):
