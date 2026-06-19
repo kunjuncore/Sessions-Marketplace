@@ -5,11 +5,15 @@ import SessionCard from "@/components/sessions/SessionCard";
 import SessionFiltersPanel from "@/components/sessions/SessionFilters";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
+import { SkeletonGrid } from "@/components/ui/SkeletonCard";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
 export default function CatalogPage() {
   const { data, loading, error, filters, setFilters } = useSessions({ ordering: "-created_at" });
 
   return (
+    <ErrorBoundary>
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Browse Sessions</h1>
@@ -26,30 +30,20 @@ export default function CatalogPage() {
 
         {/* Results */}
         <div className="flex-1">
-          {loading && (
-            <div className="flex justify-center py-20">
-              <Spinner />
-            </div>
-          )}
+          {loading && <SkeletonGrid count={6} />}
 
           {error && (
-            <div className="rounded-xl bg-red-50 p-6 text-center text-red-600">{error}</div>
+            <EmptyState icon="⚠️" title="Failed to load sessions" description={error} action={<Button onClick={() => window.location.reload()}>Retry</Button>} />
           )}
 
           {!loading && !error && data && (
             <>
               {data.results.length === 0 ? (
-                <div className="rounded-xl bg-gray-50 py-20 text-center">
-                  <div className="mb-3 text-5xl">🔍</div>
-                  <p className="text-gray-500">No sessions match your filters.</p>
-                  <Button
-                    variant="ghost"
-                    className="mt-4"
-                    onClick={() => setFilters({ ordering: "-created_at" })}
-                  >
-                    Clear filters
-                  </Button>
-                </div>
+                <EmptyState
+                  icon="🔍"
+                  title="No sessions match your filters"
+                  action={<Button variant="ghost" onClick={() => setFilters({ ordering: "-created_at" })}>Clear filters</Button>}
+                />
               ) : (
                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {data.results.map((s) => (
@@ -87,5 +81,6 @@ export default function CatalogPage() {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

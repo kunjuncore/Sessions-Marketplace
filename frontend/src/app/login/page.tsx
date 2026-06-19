@@ -6,6 +6,7 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { authService } from "@/services/auth.service";
+import { getApiError } from "@/lib/errors";
 import Spinner from "@/components/ui/Spinner";
 
 export default function LoginPage() {
@@ -25,8 +26,8 @@ export default function LoginPage() {
       login(tokens);
       toast.success(`Welcome, ${tokens.user.name}!`);
       router.push(tokens.user.role === "CREATOR" ? "/creator" : "/dashboard");
-    } catch {
-      toast.error("Login failed. Please try again.");
+    } catch (e) {
+      toast.error(getApiError(e, "Login failed. Please try again."));
     }
   };
 
