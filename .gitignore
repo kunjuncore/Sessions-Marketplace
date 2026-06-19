@@ -36,6 +36,9 @@ next-env.d.ts
 # Docker
 *.override.yml
 
+# SSL certs (self-signed, generate per environment)
+nginx/ssl/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,6 +1,7 @@
 import uuid
 from django.db import migrations, models
-import django.contrib.auth.models
+
+import apps.users.models
 
 
 class Migration(migrations.Migration):
@@ -49,7 +50,7 @@ class Migration(migrations.Migration):
                 "ordering": ["-created_at"],
             },
             managers=[
-                ("objects", django.contrib.auth.models.BaseUserManager()),
+                ("objects", apps.users.models.UserManager()),
             ],
         ),
     ]

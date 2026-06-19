@@ -65,7 +65,7 @@ class SessionPermissionTest(APITestCase):
         response = self.client.patch(
             f"/api/sessions/{self.session.id}/",
             {"title": "Updated"},
-            content_type="application/json",
+            format="json",
             **auth_header(self.creator),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -74,7 +74,7 @@ class SessionPermissionTest(APITestCase):
         response = self.client.patch(
             f"/api/sessions/{self.session.id}/",
             {"title": "Stolen"},
-            content_type="application/json",
+            format="json",
             **auth_header(self.other_creator),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -83,7 +83,7 @@ class SessionPermissionTest(APITestCase):
         response = self.client.patch(
             f"/api/sessions/{self.session.id}/",
             {"title": "Nope"},
-            content_type="application/json",
+            format="json",
             **auth_header(self.user),
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

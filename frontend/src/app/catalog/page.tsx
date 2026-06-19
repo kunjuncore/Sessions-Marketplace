@@ -16,8 +16,8 @@ export default function CatalogPage() {
     <ErrorBoundary>
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Browse Sessions</h1>
-        <p className="mt-1 text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900">Browse Sessions</h1>
+        <p className="mt-1 text-sm text-gray-500">
           {data ? `${data.count} session${data.count !== 1 ? "s" : ""} available` : ""}
         </p>
       </div>
@@ -33,14 +33,13 @@ export default function CatalogPage() {
           {loading && <SkeletonGrid count={6} />}
 
           {error && (
-            <EmptyState icon="⚠️" title="Failed to load sessions" description={error} action={<Button onClick={() => window.location.reload()}>Retry</Button>} />
+            <EmptyState title="Failed to load sessions" description={error} action={<Button onClick={() => window.location.reload()}>Retry</Button>} />
           )}
 
           {!loading && !error && data && (
             <>
               {data.results.length === 0 ? (
                 <EmptyState
-                  icon="🔍"
                   title="No sessions match your filters"
                   action={<Button variant="ghost" onClick={() => setFilters({ ordering: "-created_at" })}>Clear filters</Button>}
                 />

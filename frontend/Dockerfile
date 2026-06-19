@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies with caching
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline
+RUN npm install --prefer-offline
 
 # ── Builder stage ───────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder

@@ -20,8 +20,8 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { useRouter } from "next/navigation";
 
 const sidebarItems = [
-  { href: "/dashboard", label: "Overview", icon: "🏠" },
-  { href: "/catalog", label: "Browse Sessions", icon: "🔍" },
+  { href: "/dashboard", label: "Overview" },
+  { href: "/catalog", label: "Browse Sessions" },
 ];
 
 function DashboardContent() {
@@ -69,7 +69,6 @@ function DashboardContent() {
   if (error || !data) {
     return (
       <EmptyState
-        icon="⚠️"
         title="Failed to load dashboard"
         description={error ?? "Please try again."}
         action={<Button onClick={() => window.location.reload()}>Retry</Button>}
@@ -85,7 +84,7 @@ function DashboardContent() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Hello, {data.profile.name} 👋
+              Hello, {data.profile.name}
             </h1>
             <div className="mt-1 flex items-center gap-2">
               <Badge label={data.profile.role} variant={data.profile.role} />
@@ -99,10 +98,10 @@ function DashboardContent() {
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Total Bookings" value={data.stats.total} color="text-blue-600" />
-          <StatCard label="Pending" value={data.stats.pending} color="text-yellow-500" />
-          <StatCard label="Confirmed" value={data.stats.confirmed} color="text-green-600" />
-          <StatCard label="Cancelled" value={data.stats.cancelled} color="text-red-500" />
+          <StatCard label="Total Bookings" value={data.stats.total} accent="blue" />
+          <StatCard label="Pending" value={data.stats.pending} accent="yellow" />
+          <StatCard label="Confirmed" value={data.stats.confirmed} accent="green" />
+          <StatCard label="Cancelled" value={data.stats.cancelled} accent="red" />
         </div>
 
         {/* Upcoming */}
@@ -110,7 +109,6 @@ function DashboardContent() {
           <h2 className="mb-4 text-lg font-semibold text-gray-800">Upcoming Sessions</h2>
           {data.upcoming_bookings.length === 0 ? (
             <EmptyState
-              icon="📅"
               title="No upcoming sessions"
               description="Your confirmed bookings will appear here."
               action={<Link href="/catalog"><Button size="sm">Browse Sessions</Button></Link>}
@@ -129,7 +127,6 @@ function DashboardContent() {
           <h2 className="mb-4 text-lg font-semibold text-gray-800">Recent Bookings</h2>
           {data.recent_bookings.length === 0 ? (
             <EmptyState
-              icon="🎓"
               title="No bookings yet"
               description="Start by browsing available sessions."
               action={<Link href="/catalog"><Button size="sm">Browse Sessions</Button></Link>}

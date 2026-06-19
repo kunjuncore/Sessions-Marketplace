@@ -8,6 +8,10 @@ SECRET_KEY = config("SECRET_KEY", default="change-me-in-production")
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
+# Ensure common loopback and test hosts are always allowed
+for h in ("testserver", "localhost", "127.0.0.1", ".localhost"):
+    if h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(h)
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 

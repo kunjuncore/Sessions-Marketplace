@@ -24,12 +24,12 @@ export default function SessionFiltersPanel({ filters, onChange }: Props) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-gray-100 bg-white p-5"
     >
-      <h3 className="mb-4 font-semibold text-gray-800">Filters</h3>
+      <h3 className="mb-4 text-sm font-semibold text-gray-900">Filters</h3>
 
       <div className="flex flex-col gap-3">
-        <Input label="Search" placeholder="Title, creator…" {...register("search")} />
+        <Input label="Search" placeholder="Title, creator&hellip;" {...register("search")} />
 
         <div className="grid grid-cols-2 gap-2">
           <Input label="Min price ($)" type="number" placeholder="0" {...register("min_price")} />
@@ -45,14 +45,14 @@ export default function SessionFiltersPanel({ filters, onChange }: Props) {
           <label className="text-sm font-medium text-gray-700">Sort by</label>
           <select
             {...register("ordering")}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-100"
           >
             <option value="-created_at">Newest</option>
             <option value="created_at">Oldest</option>
-            <option value="price">Price: Low → High</option>
-            <option value="-price">Price: High → Low</option>
-            <option value="duration">Duration: Short → Long</option>
-            <option value="-duration">Duration: Long → Short</option>
+            <option value="price">Price: Low &rarr; High</option>
+            <option value="-price">Price: High &rarr; Low</option>
+            <option value="duration">Duration: Short &rarr; Long</option>
+            <option value="-duration">Duration: Long &rarr; Short</option>
           </select>
         </div>
       </div>

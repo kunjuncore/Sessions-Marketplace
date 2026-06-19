@@ -10,10 +10,6 @@ from apps.bookings.models import Booking
 from apps.bookings.serializers import BookingSerializer
 from apps.sessions_app.models import Session
 from apps.sessions_app.serializers import SessionSerializer
-from .serializers import (
-    UserDashboardSerializer,
-    CreatorDashboardSerializer,
-)
 
 
 class UserDashboardView(APIView):
@@ -60,8 +56,7 @@ class UserDashboardView(APIView):
             "upcoming_bookings": BookingSerializer(upcoming_bookings, many=True, context=ctx).data,
             "past_bookings": BookingSerializer(past_bookings, many=True, context=ctx).data,
         }
-        serializer = UserDashboardSerializer(data)
-        return Response(serializer.data)
+        return Response(data)
 
 
 class CreatorDashboardView(APIView):
@@ -128,5 +123,4 @@ class CreatorDashboardView(APIView):
             "recent_bookings": BookingSerializer(recent_bookings, many=True, context=ctx).data,
             "top_sessions": SessionSerializer(top_sessions, many=True, context=ctx).data,
         }
-        serializer = CreatorDashboardSerializer(data)
-        return Response(serializer.data)
+        return Response(data)

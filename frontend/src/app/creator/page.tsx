@@ -21,8 +21,8 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import type { Session } from "@/types";
 
 const sidebarItems = [
-  { href: "/creator", label: "Overview", icon: "🏠" },
-  { href: "/catalog", label: "Browse", icon: "🔍" },
+  { href: "/creator", label: "Overview" },
+  { href: "/catalog", label: "Browse" },
 ];
 
 type Tab = "overview" | "sessions" | "bookings";
@@ -113,7 +113,6 @@ function CreatorDashboardContent() {
   if (error || !data) {
     return (
       <EmptyState
-        icon="⚠️"
         title="Failed to load dashboard"
         description={error ?? "Please try again."}
         action={<Button onClick={() => window.location.reload()}>Retry</Button>}
@@ -158,16 +157,16 @@ function CreatorDashboardContent() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard label="Total Sessions" value={data.stats.total_sessions} />
               <StatCard label="Total Bookings" value={data.stats.total_bookings} />
-              <StatCard label="Revenue" value={`$${parseFloat(data.stats.total_revenue).toFixed(2)}`} color="text-green-600" />
-              <StatCard label="Pending" value={data.stats.pending_bookings} color="text-yellow-500" />
-              <StatCard label="Confirmed" value={data.stats.confirmed_bookings} color="text-green-600" />
-              <StatCard label="Cancelled" value={data.stats.cancelled_bookings} color="text-red-500" />
+              <StatCard label="Revenue" value={`$${parseFloat(data.stats.total_revenue).toFixed(2)}`} accent="green" />
+              <StatCard label="Pending" value={data.stats.pending_bookings} accent="yellow" />
+              <StatCard label="Confirmed" value={data.stats.confirmed_bookings} accent="green" />
+              <StatCard label="Cancelled" value={data.stats.cancelled_bookings} accent="red" />
             </div>
 
             <div>
               <h2 className="mb-4 text-lg font-semibold">Top Sessions by Bookings</h2>
               {data.top_sessions.length === 0 ? (
-                <EmptyState icon="📋" title="No sessions yet" description="Create your first session to get started." />
+                <EmptyState title="No sessions yet" description="Create your first session to get started." />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {data.top_sessions.map((s) => <SessionCard key={s.id} session={s} />)}
@@ -178,7 +177,7 @@ function CreatorDashboardContent() {
             <div>
               <h2 className="mb-4 text-lg font-semibold">Recent Bookings</h2>
               {data.recent_bookings.length === 0 ? (
-                <EmptyState icon="📭" title="No bookings yet" />
+                <EmptyState title="No bookings yet" />
               ) : (
                 <div className="flex flex-col gap-3">
                   {data.recent_bookings.map((b) => <BookingCard key={b.id} booking={b} />)}
@@ -193,7 +192,6 @@ function CreatorDashboardContent() {
           <div className="space-y-3">
             {data.recent_sessions.length === 0 ? (
               <EmptyState
-                icon="📋"
                 title="No sessions yet"
                 action={<Button onClick={() => setShowCreateModal(true)}>Create Session</Button>}
               />
@@ -223,7 +221,7 @@ function CreatorDashboardContent() {
         {tab === "bookings" && (
           <div className="flex flex-col gap-3">
             {data.recent_bookings.length === 0 ? (
-              <EmptyState icon="📭" title="No bookings for your sessions yet" />
+              <EmptyState title="No bookings for your sessions yet" />
             ) : (
               data.recent_bookings.map((b) => (
                 <div

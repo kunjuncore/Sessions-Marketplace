@@ -159,7 +159,7 @@ class SessionCRUDTest(APITestCase):
         response = self.client.patch(
             f"/api/sessions/{self.session.id}/",
             {"title": "Updated Title"},
-            content_type="application/json",
+            format="json",
             **auth_header(self.creator),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -198,7 +198,7 @@ class SessionCRUDTest(APITestCase):
         response = self.client.patch(
             f"/api/sessions/{self.session.id}/",
             {"price": "-5.00"},
-            content_type="application/json",
+            format="json",
             **auth_header(self.creator),
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
