@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.sessions_app",
     "apps.bookings",
+    "apps.dashboard",
 ]
 
 MIDDLEWARE = [
