@@ -1,20 +1,20 @@
-const colors = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
-  USER: "bg-blue-100 text-blue-800",
-  CREATOR: "bg-purple-100 text-purple-800",
+const variants = {
+  PENDING:   "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200",
+  CONFIRMED: "bg-green-50 text-green-700 ring-1 ring-green-200",
+  CANCELLED: "bg-red-50 text-red-600 ring-1 ring-red-200",
+  USER:      "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  CREATOR:   "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
 };
 
 interface BadgeProps {
   label: string;
-  variant?: keyof typeof colors;
+  variant?: keyof typeof variants;
 }
 
 export default function Badge({ label, variant }: BadgeProps) {
-  const cls = variant ? colors[variant] : "bg-gray-100 text-gray-700";
+  const cls = variant ? variants[variant] : "bg-gray-100 text-gray-600 ring-1 ring-gray-200";
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
       {label}
     </span>
   );
