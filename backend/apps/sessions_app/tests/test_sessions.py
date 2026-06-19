@@ -1,4 +1,9 @@
 from decimal import Decimal
+import shutil
+import tempfile
+
+from django.core.files.base import ContentFile
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -114,6 +119,19 @@ class SessionCRUDTest(APITestCase):
         self.assertIn("booking_count", response.data)
         self.assertIn("is_booked", response.data)
 
+    def test_retrieve_session_marks_authenticated_user_booking(self):
+        user = User.objects.create_user(
+            email="user@example.com", name="User", role=User.Role.USER
+        )
+        Booking.objects.create(user=user, session=self.session)
+
+        response = self.client.get(
+            f"/api/sessions/{self.session.id}/", **auth_header(user)
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["is_booked"])
+
     def test_create_session(self):
         data = {
             "title": "New Session",
@@ -148,6 +166,27 @@ class SessionCRUDTest(APITestCase):
         self.session.refresh_from_db()
         self.assertEqual(self.session.title, "Updated Title")
 
+    def test_full_update_session(self):
+        data = {
+            "title": "Fully Updated",
+            "description": "Updated description",
+            "price": "79.99",
+            "duration": 75,
+        }
+        response = self.client.put(
+            f"/api/sessions/{self.session.id}/",
+            data,
+            format="json",
+            **auth_header(self.creator),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.title, "Fully Updated")
+        self.assertEqual(self.session.description, "Updated description")
+        self.assertEqual(self.session.price, Decimal("79.99"))
+        self.assertEqual(self.session.duration, 75)
+
     def test_delete_session(self):
         response = self.client.delete(
             f"/api/sessions/{self.session.id}/", **auth_header(self.creator)
@@ -173,6 +212,47 @@ class SessionCRUDTest(APITestCase):
         }
         response = self.client.post("/api/sessions/", data, **auth_header(self.creator))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class SessionImageTest(APITestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp()
+        self.override = override_settings(MEDIA_ROOT=self.media_root)
+        self.override.enable()
+        self.creator = User.objects.create_user(
+            email="creator@example.com", name="Creator", role=User.Role.CREATOR
+        )
+        self.session = make_session(self.creator)
+        self.session.image.save(
+            "sessions/test-image.jpg", ContentFile(b"fake image bytes"), save=True
+        )
+
+    def tearDown(self):
+        self.override.disable()
+        shutil.rmtree(self.media_root, ignore_errors=True)
+        super().tearDown()
+
+    def test_creator_can_remove_session_image(self):
+        response = self.client.delete(
+            f"/api/sessions/{self.session.id}/image/",
+            **auth_header(self.creator),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.session.refresh_from_db()
+        self.assertFalse(self.session.image)
+
+    def test_remove_image_is_idempotent(self):
+        self.session.image.delete(save=False)
+        self.session.image = None
+        self.session.save(update_fields=["image"])
+
+        response = self.client.delete(
+            f"/api/sessions/{self.session.id}/image/",
+            **auth_header(self.creator),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class MySessionsTest(APITestCase):

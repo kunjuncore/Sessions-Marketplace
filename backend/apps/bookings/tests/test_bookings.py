@@ -1,4 +1,6 @@
 from decimal import Decimal
+import uuid
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -75,6 +77,31 @@ class BookingCreateTest(APITestCase):
         )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_cancelled_existing_booking_cannot_be_rebooked(self):
+        Booking.objects.create(
+            user=self.user, session=self.session, status=Booking.Status.CANCELLED
+        )
+        res = self.client.post(
+            "/api/bookings/",
+            {"session": str(self.session.id)},
+            format="json",
+            **auth_header(self.user),
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("cancelled booking", str(res.data["session"]))
+
+    def test_unknown_session_id_rejected(self):
+        res = self.client.post(
+            "/api/bookings/",
+            {"session": str(uuid.uuid4())},
+            format="json",
+            **auth_header(self.user),
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("session", res.data)
+
     def test_unauthenticated_cannot_book(self):
         res = self.client.post(
             "/api/bookings/",
@@ -92,6 +119,53 @@ class BookingCreateTest(APITestCase):
             **auth_header(other_creator),
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+
+class BookingDetailTest(APITestCase):
+    def setUp(self):
+        self.user = make_user("user@example.com", "User")
+        self.other_user = make_user("other@example.com", "Other User")
+        self.creator = make_user("creator@example.com", "Creator", User.Role.CREATOR)
+        self.other_creator = make_user(
+            "other-creator@example.com", "Other Creator", User.Role.CREATOR
+        )
+        self.session = make_session(self.creator)
+        self.booking = Booking.objects.create(user=self.user, session=self.session)
+
+    def test_booking_owner_can_retrieve_detail(self):
+        res = self.client.get(
+            f"/api/bookings/{self.booking.id}/", **auth_header(self.user)
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["id"], str(self.booking.id))
+
+    def test_session_creator_can_retrieve_detail(self):
+        res = self.client.get(
+            f"/api/bookings/{self.booking.id}/", **auth_header(self.creator)
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["session"]["id"], str(self.session.id))
+
+    def test_unrelated_user_cannot_retrieve_detail(self):
+        res = self.client.get(
+            f"/api/bookings/{self.booking.id}/", **auth_header(self.other_user)
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_unrelated_creator_cannot_retrieve_detail(self):
+        res = self.client.get(
+            f"/api/bookings/{self.booking.id}/", **auth_header(self.other_creator)
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_unauthenticated_cannot_retrieve_detail(self):
+        res = self.client.get(f"/api/bookings/{self.booking.id}/")
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class MyBookingsTest(APITestCase):

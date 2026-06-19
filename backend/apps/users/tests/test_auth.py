@@ -1,5 +1,4 @@
-from unittest.mock import patch, MagicMock
-from django.urls import reverse
+from unittest.mock import patch
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -53,6 +52,26 @@ class GoogleAuthViewTest(APITestCase):
         user.refresh_from_db()
         self.assertEqual(user.avatar, "https://new-avatar.com/pic.jpg")
 
+    @patch("apps.users.views.id_token.verify_oauth2_token")
+    def test_name_synced_on_existing_user_login(self, mock_verify):
+        user = User.objects.create_user(email="test@example.com", name="Old Name")
+        mock_verify.return_value = self._mock_idinfo(name="Updated Google Name")
+
+        response = self.client.post(self.url, {"token": "valid-google-token"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertEqual(user.name, "Updated Google Name")
+
+    @patch("apps.users.views.id_token.verify_oauth2_token")
+    def test_google_response_without_email_returns_400(self, mock_verify):
+        mock_verify.return_value = {"name": "No Email User", "picture": ""}
+
+        response = self.client.post(self.url, {"token": "valid-google-token"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.count(), 0)
+
     def test_missing_token_returns_400(self):
         response = self.client.post(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -86,6 +105,32 @@ class MeViewTest(APITestCase):
     def test_unauthenticated_returns_401(self):
         self.client.credentials()
         response = self.client.get("/api/auth/me/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class TokenRefreshViewTest(APITestCase):
+    def test_refresh_token_returns_new_access_token(self):
+        user = User.objects.create_user(
+            email="refresh@example.com", name="Refresh User"
+        )
+        refresh = RefreshToken.for_user(user)
+
+        response = self.client.post(
+            "/api/auth/token/refresh/",
+            {"refresh": str(refresh)},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+
+    def test_invalid_refresh_token_returns_401(self):
+        response = self.client.post(
+            "/api/auth/token/refresh/",
+            {"refresh": "not-a-valid-token"},
+            format="json",
+        )
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
